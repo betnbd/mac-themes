@@ -109,5 +109,6 @@ import ThemeCore
 @MainActor func ghosttyScriptCompilesWithoutExecutionWhenInstalled() throws {
     let script = try #require(NSAppleScript(source: AppleScripts.ghosttyReload))
     var error: NSDictionary?
-    #expect(script.compileAndReturnError(&error), "\(error?.description ?? "Script failed to compile")")
+    let compiled = script.compileAndReturnError(&error)
+    #expect(compiled, "\(error?.description ?? "Script failed to compile")")
 }
