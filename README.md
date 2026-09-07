@@ -211,7 +211,7 @@ They remain open afterward. Browsing themes never launches applications.
 
 ## License and acknowledgments
 
-A project-level license has not yet been added for the original Mac Themes code.
+Mac Themes is released under the [MIT License](LICENSE).
 Bundled third-party materials retain their own licenses; see
 [Omarchy](Vendor/Omarchy/LICENSE), [Nerd Fonts](Vendor/NerdFonts/LICENSE), and each
 font family's license in `Vendor/NerdFonts`. Theme and wallpaper rights remain
