@@ -20,6 +20,7 @@ for THEME_NAME in tokyo-night gruvbox osaka-jade hackerman catppuccin solitude e
   mkdir -p "$APP/Contents/Resources/BuiltinWallpapers/$THEME_NAME"
   ditto "$THEME_DIR" "$APP/Contents/Resources/BuiltinWallpapers/$THEME_NAME"
 done
+ditto Vendor/NerdFonts "$APP/Contents/Resources/NerdFonts"
 zsh scripts/sign.sh "$APP"
 mkdir -p dist
 ditto -c -k --norsrc --keepParent "$APP" "dist/Mac Themes.zip"

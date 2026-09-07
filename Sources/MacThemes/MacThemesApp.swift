@@ -70,7 +70,18 @@ struct LauncherMenu: View {
                 .accessibilityElement(children: .combine)
                 .accessibilityLabel("\(store.selected.name), \(store.selected.isLight ? "light" : "dark") theme, wallpaper preview")
 
-            ThemePreview(theme: store.selected)
+            VStack(alignment: .leading, spacing: 5) {
+                Picker("Font", selection: Binding(get: { store.selectedFontID }, set: { store.selectFont($0) })) {
+                    Text("Keep unchanged").tag("")
+                    Text("Use app default").tag("default")
+                    ForEach(ThemeFont.all) { font in
+                        Text(font.name + (font.directory == nil ? "" : " · Nerd")).tag(font.id)
+                    }
+                }.disabled(store.busy || store.importing || store.restoring)
+                Text("Ghostty · Obsidian · ChatGPT code")
+                    .font(.system(size: 10)).foregroundStyle(.secondary)
+            }
+            ThemePreview(theme: store.previewTheme)
 
             VStack(alignment: .leading, spacing: 7) {
                 HStack {
@@ -448,7 +459,7 @@ struct ThemePreview: View {
                 Text("~ ").foregroundStyle(Color(hex: theme.accent))
                 Text("❯ ").foregroundStyle(Color(hex: theme.palette[2]))
                 Text("make yourself at home").foregroundStyle(Color(hex: theme.foreground))
-            }.font(.system(size: 11, design: .monospaced))
+            }.font(theme.fontFamily.map { .custom($0, size: 11) } ?? .system(size: 11, design: .monospaced))
             HStack(spacing: 5) {
                 ForEach(1..<7) { index in
                     RoundedRectangle(cornerRadius: 3).fill(Color(hex: theme.palette[index])).frame(height: 11)

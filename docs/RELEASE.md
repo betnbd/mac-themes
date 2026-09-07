@@ -1,40 +1,73 @@
-# Release 1.0.0
+# Release 1.2.0
 
 The version and build number are maintained in `scripts/Info.plist`.
 The production and Preview identifiers remain distinct and stable to preserve
-local permission continuity.
+local permission continuity. Keep existing tags immutable.
 
 ## Validation
 
-Run these from the project root:
-
 ```sh
+python3 scripts/verify-assets.py
 zsh scripts/test.sh
 zsh scripts/build.sh
 zsh scripts/test-signing.sh
-unzip -t "dist/Mac Themes.zip"
+python3 scripts/verify-package.py
 ```
 
-The automated suite covers palette conversion, bounded imports, generated
-configuration, restoration conflicts, accessibility navigation, wallpaper
-library persistence and following Spaces. Live application appearance still
-requires a manual check against the installed application versions; passing
-unit tests does not verify every external application's UI.
+GitHub Actions runs asset validation, tests, an ad-hoc signed build and extracted
+package verification on pushes to main, version tags and pull requests. Its ZIP
+is a test artifact, not a notarized release. CI does not receive signing secrets.
 
-The optional live macOS appearance test is disabled by default. Setting
-`MAC_THEMES_VERIFY_LIVE_APPEARANCE=1` explicitly enables a test that applies the
-saved theme to the actual desktop appearance using the normal backup mechanism.
+Tests cover imports, restoration conflicts, accessibility navigation, wallpaper
+persistence and Spaces, per-destination application results, failed applies across
+restarts, font-mode transitions and interrupted font upgrades. Historical apply
+writers live only in test fixtures and still exercise production restore code.
+Live external app UI behavior needs checking against installed app versions.
 
-## Packaging
+`MAC_THEMES_VERIFY_LIVE_APPEARANCE=1` explicitly enables an otherwise disabled
+macOS appearance test. It changes the real desktop using the normal backup path.
+Do not set it in CI.
 
-`build.sh` assembles a fresh bundle with the executable, icon, 32 curated
-wallpapers and upstream license/provenance. Source files, tests, development
-reports and signing secrets are not bundled. `replace-app.py` validates signatures
-and atomically replaces existing build products, archiving the previous bundle
-outside the project under `~/Library/Caches/MacThemes/Archives/updates`.
+## Local packaging
 
-The current build produces a locally signed ZIP, not a notarized public release.
-Before posting a downloadable macOS app, sign the distribution bundle with a
-Developer ID Application identity, notarize it with Apple, staple the accepted
-ticket and rebuild the ZIP from that bundle. That distribution workflow is not
-implemented by the local build script.
+The local build contains the executable, icon, 32 wallpapers, 16 font faces and
+upstream licenses/provenance. It excludes source, tests, trash and credentials.
+`replace-app.py` atomically replaces signed build products and archives the old
+bundle outside the project. The default local signer preserves its identity.
+`MAC_THEMES_SIGNING=adhoc` is for disposable CI builds only.
+
+## Notarized distribution
+
+Requires a valid **Developer ID Application** certificate and its private key,
+and a notarytool keychain profile. The current development Mac has no valid
+Developer ID identity; notarization cannot be completed until one is configured.
+
+Commit the release source, tag that commit with the version in Info.plist, then:
+
+```sh
+DEVELOPER_ID_APPLICATION='Developer ID Application: Your Name (TEAMID)' \
+NOTARY_PROFILE='your-notarytool-profile' \
+zsh scripts/release.sh
+```
+
+The script requires a clean checkout and matching version tag. It validates and
+builds the app, signs a separate distribution copy with hardened runtime and a
+secure timestamp, submits it to Apple, requires acceptance, staples the ticket,
+checks Gatekeeper assessment and verifies the final ZIP. It writes the versioned
+ZIP and SHA-256 checksum under `dist/`. It does not replace your installed app or
+publish anything to GitHub. Notarization credentials stay in Keychain.
+
+See Apple's [notarization workflow](https://developer.apple.com/documentation/security/customizing-the-notarization-workflow).
+
+## State and compatibility
+
+`application-results.json` records each destination's requested theme, last
+confirmed applied theme and typed result. `previewThemeID` in app preferences is
+independent of these records. Old `state.json` snapshots remain readable and
+retain their original restore data. Pending ChatGPT applications update their
+own result when completed after launch.
+
+Fonts use a private `.mac-themes-fonts.json` ownership journal in
+`~/Library/Fonts/MacThemes`. Upgrades accept the recorded current or previous
+hash, making an interrupted pair replacement retryable. Identical untracked fonts
+are usable but are not claimed as owned; differing untracked fonts are preserved.

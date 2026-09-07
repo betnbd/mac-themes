@@ -77,7 +77,7 @@ import Testing
     #expect(try Data(contentsOf: path) == data)
 }
 
-@Test @MainActor func customWallpaperSelectionPersistsInLocalPreferences() async throws {
+@Test @MainActor func customWallpaperSelectionStaysPendingWithoutEnabledDestinations() async throws {
     let (root, image) = try wallpaperFixture()
     defer { try? FileManager.default.removeItem(at: root) }
     let suite = UUID().uuidString
@@ -90,7 +90,8 @@ import Testing
     let selected = try #require(store.selectedWallpaper)
     #expect(selected.id.hasPrefix("custom:"))
     store.applySelected()
-    #expect((defaults.dictionary(forKey: "wallpaperSelections") as? [String: String])?[store.selected.id] == selected.id)
+    #expect(defaults.dictionary(forKey: "wallpaperSelections") == nil)
+    #expect(store.selectedWallpaper?.id == selected.id)
     #expect(!FileManager.default.fileExists(atPath: root.appendingPathComponent("Themes").path))
     store.removeWallpaper(selected)
     while store.editingWallpapers { try await Task.sleep(for: .milliseconds(10)) }
@@ -141,5 +142,5 @@ import Testing
     store.applySelected()
     #expect(store.selectedWallpaper?.id == selected.id)
     #expect(try Data(contentsOf: manifest) == original)
-    #expect((defaults.dictionary(forKey: "wallpaperSelections") as? [String: String])?[source.id] == selected.id)
+    #expect(defaults.dictionary(forKey: "wallpaperSelections") == nil)
 }

@@ -100,13 +100,13 @@ struct ChatGPTThemeShare {
         try JSONEncoder().encode(journal).write(to: path, options: .atomic)
     }
 
-    func apply(_ theme: Theme) async throws -> String {
+    func apply(_ theme: Theme) async throws -> ApplyResult {
         guard !active else { throw ThemeError.message("ChatGPT appearance update is already running.") }
         active = true
         defer { active = false; client.finish() }
         journal.pending = theme
         try save()
-        guard client.isRunning else { return "Waiting · applies automatically when ChatGPT opens" }
+        guard client.isRunning else { return .pending("Waiting · applies automatically when ChatGPT opens") }
         try await client.prepare()
         let mode = try client.mode()
         let variant = theme.isLight ? "light" : "dark"
@@ -132,7 +132,7 @@ struct ChatGPTThemeShare {
         }
         journal.pending = nil
         try save()
-        return "Applied · verified through ChatGPT's live Appearance controls"
+        return .applied("Applied · verified through ChatGPT's live Appearance controls")
     }
 
     func restore() async throws -> String {

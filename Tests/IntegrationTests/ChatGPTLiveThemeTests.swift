@@ -61,7 +61,7 @@ import ThemeCore
         let saved = try JSONDecoder().decode(ChatGPTLiveTheme.Journal.self, from: Data(contentsOf: root.appendingPathComponent("chatgpt-live-state.json")))
         #expect(saved.themes["dark"]?.original == original)
     }
-    #expect(try await service.apply(Theme.all[0]).hasPrefix("Applied"))
+    #expect(try await service.apply(Theme.all[0]).state == .applied)
     let applied = try ChatGPTThemeShare(client.shares["dark"]!)
     #expect(applied.theme["surface"] as? String == "#1a1b26")
     #expect(applied.codeTheme == "tokyo-night")
@@ -81,14 +81,14 @@ import ThemeCore
     defer { try? FileManager.default.removeItem(at: root) }
     let client = try AppearanceFixture(); client.isRunning = false
     let service = try ChatGPTLiveTheme(root: root, client: client)
-    #expect(try await service.apply(Theme.all[0]).hasPrefix("Waiting"))
+    #expect(try await service.apply(Theme.all[0]).state == .pending)
     _ = try await service.apply(Theme.all[2])
     #expect(client.prepares == 0)
     #expect(client.imports.isEmpty)
     let recovered = try ChatGPTLiveTheme(root: root, client: client)
     #expect(recovered.pendingTheme == Theme.all[2])
     client.isRunning = true
-    #expect(try await recovered.apply(recovered.pendingTheme!).hasPrefix("Applied"))
+    #expect(try await recovered.apply(recovered.pendingTheme!).state == .applied)
     #expect(client.appearanceMode == "light")
     #expect(recovered.pendingTheme == nil)
 }
@@ -220,4 +220,23 @@ import ThemeCore
     let equivalent = "codex-theme-v1:" + String(decoding: try JSONSerialization.data(withJSONObject: object), as: UTF8.self)
     #expect(try ChatGPTThemeShare(share).equivalent(to: equivalent))
     #expect(throws: (any Error).self) { try ChatGPTThemeShare("codex-theme-v1:{\"theme\":{}}") }
+}
+
+@Test @MainActor func customFontThenDefaultStillRestoresOriginalChatGPTTypography() async throws {
+    let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    defer { try? FileManager.default.removeItem(at: root) }
+    let client = try AppearanceFixture()
+    var original = Theme.bundled[0]; original.fontFamily = "Menlo"
+    client.shares["dark"] = try ChatGPTConfigEditor.shareString(original)
+    let before = client.shares["dark"]!
+    let service = try ChatGPTLiveTheme(root: root, client: client)
+    var chosen = Theme.bundled[1]; chosen.fontFamily = "Monaco"
+    _ = try await service.apply(chosen)
+    var reset = chosen; reset.fontFamily = nil; reset.useDefaultFont = true
+    _ = try await service.apply(reset)
+    let actual = try ChatGPTThemeShare(client.shares["dark"]!)
+    #expect((actual.theme["fonts"] as? [String: Any])?["code"] is NSNull)
+    let reopened = try ChatGPTLiveTheme(root: root, client: client)
+    _ = try await reopened.restore()
+    #expect(try ChatGPTThemeShare(client.shares["dark"]!).equivalent(to: before))
 }

@@ -1,0 +1,106 @@
+{
+  "repository": "https://github.com/ryanoasis/nerd-fonts",
+  "commit": "33db50390a1b173e6f19ecc2119248d2ec166a11",
+  "files": [
+    {
+      "path": "patched-fonts/JetBrainsMono/Ligatures/JetBrainsMonoNerdFontMono-Regular.ttf",
+      "sha256": "f2a5ea6cfab397445ffab00c0370927b66d61e560a05db5db271b42006381c1a"
+    },
+    {
+      "path": "patched-fonts/JetBrainsMono/Ligatures/JetBrainsMonoNerdFontMono-Bold.ttf",
+      "sha256": "bfcf9a917276ffc058867d87cbc8a5b2f1ab0f4b710e9170dc02763ccb80bd4b"
+    },
+    {
+      "path": "patched-fonts/JetBrainsMono/Ligatures/OFL.txt",
+      "sha256": "30f0c136e3c88e422d0791acd97238870f9054a9729bc34cf2ff0d4ed8cac4ad"
+    },
+    {
+      "path": "patched-fonts/FiraCode/FiraCodeNerdFontMono-Regular.ttf",
+      "sha256": "53eebbaaa09c483ebb27fdd5cf21073cc4b760308e5d666728e9db2f41616c00"
+    },
+    {
+      "path": "patched-fonts/FiraCode/FiraCodeNerdFontMono-Bold.ttf",
+      "sha256": "7435c06ecc46dc975d2c356bf9bf1d8bc2226fdb1a877e6e9580193aae429519"
+    },
+    {
+      "path": "patched-fonts/FiraCode/LICENSE",
+      "sha256": "1d41e10031ab125302780a05ec4c91d218e47db0c7e37cf315cce5e608cdc25c"
+    },
+    {
+      "path": "patched-fonts/Hack/HackNerdFontMono-Regular.ttf",
+      "sha256": "e5aeb58577a8acf2b42083e4a07ce48bd53116fdd868636403cadb5b547351be"
+    },
+    {
+      "path": "patched-fonts/Hack/HackNerdFontMono-Bold.ttf",
+      "sha256": "7c2c76c26ff80fb546798b204ae519335573417c969eb3142d202298722d3832"
+    },
+    {
+      "path": "patched-fonts/Hack/LICENSE.md",
+      "sha256": "1f61bb7c790c59b4b0ecdf304628b94e42ae4c8020094a8c3da73381ab212623"
+    },
+    {
+      "path": "patched-fonts/Iosevka/IosevkaNerdFontMono-Regular.ttf",
+      "sha256": "f803b8eac0897b94eef776c54dd0468cd1780ec065b6877ad839cf79fcc6f162"
+    },
+    {
+      "path": "patched-fonts/Iosevka/IosevkaNerdFontMono-Bold.ttf",
+      "sha256": "cb71bce0356159a074a92c77ee9aff5317fd53b3ef374118332a7b544c6798d9"
+    },
+    {
+      "path": "patched-fonts/Iosevka/LICENSE.md",
+      "sha256": "7484961b97b41985d54c21700e53f7142a7007d72401acbd32c0b9c6a5a0b558"
+    },
+    {
+      "path": "patched-fonts/CascadiaCode/CaskaydiaCoveNerdFontMono-Regular.ttf",
+      "sha256": "4e1e371b188bca589ec1ee7df494ca7bbb187c1c38228c059e5705f4029a9dc0"
+    },
+    {
+      "path": "patched-fonts/CascadiaCode/CaskaydiaCoveNerdFontMono-Bold.ttf",
+      "sha256": "fadc873712c25c12f1135709a6675f3a929bd624ddb77aecec3adb8db070592c"
+    },
+    {
+      "path": "patched-fonts/CascadiaCode/LICENSE",
+      "sha256": "82c05d6c53dfa0c9025985c19e371810020b74ed2c61d51d370f2a8ab2506d52"
+    },
+    {
+      "path": "patched-fonts/Meslo/S/MesloLGSNerdFontMono-Regular.ttf",
+      "sha256": "d14fdc035e41392917b9d665f91af5570b717191b63875532b5bb1b5d5aafcf8"
+    },
+    {
+      "path": "patched-fonts/Meslo/S/MesloLGSNerdFontMono-Bold.ttf",
+      "sha256": "640778cf27cf13d44f29d8d7cfddfdbd2979d6fce30732295d9ee5d610b000c4"
+    },
+    {
+      "path": "patched-fonts/Meslo/S/LICENSE.txt",
+      "sha256": "e3c320c90d84c53de4d61afa417d2c19949fa95e12d1c14a2a38a23306ad07b9"
+    },
+    {
+      "path": "patched-fonts/IBMPlexMono/BlexMonoNerdFontMono-Regular.ttf",
+      "sha256": "9f8fe62fc71c7463677fb8dc6e47fe77aa470649383be0731706f746468b61eb"
+    },
+    {
+      "path": "patched-fonts/IBMPlexMono/BlexMonoNerdFontMono-Bold.ttf",
+      "sha256": "0f0b5fc5970a8272bfa3a97e4aae465dd91b4da0faa76662635bc7bd1b91731d"
+    },
+    {
+      "path": "patched-fonts/IBMPlexMono/LICENSE.txt",
+      "sha256": "91c25c350d3cac39da2736d74f7ba37ef648f5237a4e330a240615bc8d8c4360"
+    },
+    {
+      "path": "patched-fonts/SourceCodePro/SauceCodeProNerdFontMono-Regular.ttf",
+      "sha256": "cbfe6a91123b9d78a1b593cb2efa10a806a704490e3cea6b894078b86d67c0b1"
+    },
+    {
+      "path": "patched-fonts/SourceCodePro/SauceCodeProNerdFontMono-Bold.ttf",
+      "sha256": "fedd1dcdfc4228621075dc8a61190474aace7617aff61d1faca877d340a40ff6"
+    },
+    {
+      "path": "patched-fonts/SourceCodePro/LICENSE.txt",
+      "sha256": "37f1d07d235509973aeaff5d6f22378d8d812eb998a14d321d6562e5a4cb6a89"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "1f6ad4edae6479aaace3112ede5279a23284ae54b2a34db66357aef5f64df160"
+    }
+  ]
+}

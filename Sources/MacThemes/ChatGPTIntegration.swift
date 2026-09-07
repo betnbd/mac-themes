@@ -177,6 +177,16 @@ final class ChatGPTConfigEditor {
         // Keep custom typography, contrast and translucency. In TOML, missing font
         // names represent the app's nullable/default font values.
         if appearance["fonts"] == nil { appearance["fonts"] = [String: String]() }
+        if let font = theme.fontFamily {
+            var fonts = appearance["fonts"] as? [String: Any] ?? [:]
+            fonts["code"] = font
+            appearance["fonts"] = fonts
+        }
+        if theme.useDefaultFont == true {
+            var fonts = appearance["fonts"] as? [String: Any] ?? [:]
+            fonts.removeValue(forKey: "code")
+            appearance["fonts"] = fonts
+        }
         if appearance["contrast"] == nil { appearance["contrast"] = light ? 45 : 60 }
         if appearance["opaqueWindows"] == nil { appearance["opaqueWindows"] = true }
         return ["appearanceTheme": light ? "light" : "dark", key: appearance]

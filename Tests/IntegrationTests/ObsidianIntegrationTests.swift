@@ -26,12 +26,12 @@ private struct ObsidianFixture {
     try f.prepare(original)
     let service = try ObsidianIntegration(root: f.root, home: f.home, live: false)
     #expect(!service.hasBackups)
-    #expect(try service.apply(Theme.all[0]).hasPrefix("Saved"))
+    #expect(try service.apply(Theme.all[0]).state == .pending)
     #expect(try String(contentsOf: f.appearance, encoding: .utf8) == original)
     // The user enables the snippet once in Obsidian and changes unrelated preferences later.
     try ManagedConfig.write("{\"theme\":\"moonstone\",\"enabledCssSnippets\":[\"personal\",\"mac-themes\",\"later\"],\"fontTextSize\":21,\"custom\":\"keep my spaces\"}", to: f.appearance)
     for theme in Theme.all {
-        #expect(try service.apply(theme).hasPrefix("Applied"))
+        #expect(try service.apply(theme).state == .applied)
         #expect(try String(contentsOf: f.css, encoding: .utf8) == ObsidianIntegration.css(theme))
     }
     let reopened = try ObsidianIntegration(root: f.root, home: f.home, live: false)

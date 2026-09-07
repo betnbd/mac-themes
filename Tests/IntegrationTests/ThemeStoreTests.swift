@@ -114,3 +114,19 @@ import ThemeCore
     #expect(try Data(contentsOf: root.appendingPathComponent("state.json")) == original)
     #expect(defaults.dictionary(forKey: "wallpaperSelections") == nil)
 }
+
+@Test @MainActor func corruptApplicationResultsDisableApplyButRetainRestoreAccess() async throws {
+    let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    let suite = UUID().uuidString
+    let defaults = try #require(UserDefaults(suiteName: suite))
+    defer { defaults.removePersistentDomain(forName: suite); try? FileManager.default.removeItem(at: root) }
+    try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+    var state = SavedState(); state.ghosttyPath = root.appendingPathComponent("config").path
+    try JSONEncoder().encode(state).write(to: root.appendingPathComponent("state.json"))
+    try Data("not a result journal".utf8).write(to: root.appendingPathComponent("application-results.json"))
+    let store = ThemeStore(demo: false, root: root, defaults: defaults)
+    #expect(!store.canApply)
+    #expect(store.hasBackups)
+    try await Task.sleep(for: .milliseconds(30))
+    #expect(try Data(contentsOf: root.appendingPathComponent("application-results.json")) == Data("not a result journal".utf8))
+}

@@ -105,16 +105,16 @@ final class Integrations {
 
     var hasBackups: Bool { state.ghosttyPath != nil || !state.terminal.isEmpty || state.braveCaptured || state.braveLiveTheme != nil || state.chatgpt != nil || state.chatgptPending != nil || desktop.hasBackups || obsidian.hasBackups || liveChatGPT.hasBackups || legacyHasBackups }
 
-    func applyLiveBrave(_ theme: Theme) async throws -> String {
+    func applyLiveBrave(_ theme: Theme) async throws -> ApplyResult {
         let result = try await BraveAccessibility().apply(theme, root: root)
-        if result.hasPrefix("Applied") {
+        if result.state == .applied {
             state.braveLiveTheme = theme.name
             try save()
         }
         return result
     }
 
-    func applyLiveChatGPT(_ theme: Theme) async throws -> String {
+    func applyLiveChatGPT(_ theme: Theme) async throws -> ApplyResult {
         guard state.chatgpt == nil else {
             throw ThemeError.message("Restore the older ChatGPT configuration backup before using live Appearance automation.")
         }
@@ -156,19 +156,19 @@ final class Integrations {
         return appURL(app) != nil
     }
 
-    func apply(_ theme: Theme, to app: Integration) throws -> String {
+    func apply(_ theme: Theme, to app: Integration) throws -> ApplyResult {
         guard isAvailable(app) else { throw ThemeError.message("\(app.name) is not installed or configured.") }
         if app == .obsidian { return try obsidian.apply(theme) }
         switch app {
-        case .macos: return try desktop.applyAppearance(theme)
-        case .wallpaper: return "Choose a background from the menu"
+        case .macos: return .applied(try desktop.applyAppearance(theme))
+        case .wallpaper: return .pending("Choose a background from the menu")
         case .ghostty: return try applyGhostty(theme)
-        case .brave: return try applyBrave(theme)
+        case .brave: return .pending(try applyBrave(theme))
         case .chatgpt:
             // The focused build uses native import only. Cancel a superseded
             // queued application from an older build without altering app settings.
             if case .apply = state.chatgptPending { state.chatgptPending = nil; try save() }
-            return "Ready · copy theme, then Appearance → Import"
+            return .pending("Ready · copy theme, then Appearance → Import")
         default: throw ThemeError.message("No adapter is available for \(app.name).")
         }
     }
@@ -202,7 +202,16 @@ final class Integrations {
         return selected.resolvingSymlinksInPath()
     }
 
-    private func applyGhostty(_ theme: Theme) throws -> String {
+    static func ghosttyConfiguration(_ theme: Theme, current: String) -> String {
+        guard theme.keepsFont else { return theme.ghosttyConfig }
+        let keys = Set(["font-family", "font-family-bold", "font-family-italic", "font-family-bold-italic"])
+        let overrides = current.components(separatedBy: "\n").filter {
+            keys.contains($0.components(separatedBy: "=").first?.trimmingCharacters(in: .whitespaces) ?? "")
+        }
+        return theme.ghosttyConfig + (overrides.isEmpty ? "" : overrides.joined(separator: "\n") + "\n")
+    }
+
+    private func applyGhostty(_ theme: Theme) throws -> ApplyResult {
         let url = try ghosttyConfigURL()
         let existed = files.fileExists(atPath: url.path)
         let original = existed ? try BoundedFileReader.shared.data(at: url) ?? Data() : Data()
@@ -215,21 +224,22 @@ final class Integrations {
             state.ghosttyExisted = existed
             try save()
         }
-        try theme.ghosttyConfig.write(to: generated, atomically: true, encoding: .utf8)
+        let current = try BoundedFileReader.shared.text(at: generated) ?? ""
+        try Self.ghosttyConfiguration(theme, current: current).write(to: generated, atomically: true, encoding: .utf8)
         try files.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         // Resolve the symbolic link before atomic replacement, preserving the user's dotfiles link.
         try ManagedConfig.write(updated, to: url)
         return try reloadGhostty()
     }
 
-    private func reloadGhostty() throws -> String {
-        guard running(.ghostty) else { return "Saved · takes effect when Ghostty opens" }
+    private func reloadGhostty() throws -> ApplyResult {
+        guard running(.ghostty) else { return .pending("Saved · takes effect when Ghostty opens") }
         do {
             let result = try AppleScripts.run(AppleScripts.ghosttyReload)
-            guard result.booleanValue else { return "Saved · use Ghostty → Reload Configuration" }
-            return "Applied · full terminal palette"
+            guard result.booleanValue else { return .pending("Saved · use Ghostty → Reload Configuration") }
+            return .applied("Applied · full terminal palette")
         } catch {
-            return "Saved · reload needed: \(error.localizedDescription)"
+            return .pending("Saved · reload needed: \(error.localizedDescription)")
         }
     }
 
@@ -243,7 +253,7 @@ final class Integrations {
         state.ghosttyPath = nil
         state.ghosttyOriginal = nil
         try save()
-        return "Restored · \(try reloadGhostty())"
+        return "Restored · \(try reloadGhostty().message)"
     }
 
     private func restoreTerminal() throws -> String {

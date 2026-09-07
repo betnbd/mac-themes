@@ -191,6 +191,6 @@ private func eventCode(_ value: String) -> UInt32 {
     let service = try Integrations()
     let theme = try #require(service.state.activeThemeSnapshot)
     let result = try service.apply(theme, to: .macos)
-    #expect(result.hasPrefix("Applied"))
+    #expect(result.state == .applied)
     print("Live macOS appearance: \(result)")
 }

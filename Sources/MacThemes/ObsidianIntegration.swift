@@ -78,7 +78,7 @@ final class ObsidianIntegration {
         return Set(paths.map { URL(fileURLWithPath: $0).standardizedFileURL }).sorted { $0.path < $1.path }
     }
 
-    func apply(_ theme: Theme) throws -> String {
+    func apply(_ theme: Theme) throws -> ApplyResult {
         guard theme.palette.count == 16,
               (theme.palette + [theme.background, theme.foreground, theme.accent, theme.selection]).allSatisfy({ $0.range(of: "^#[0-9a-fA-F]{6}$", options: .regularExpression) != nil }) else {
             throw ThemeError.message("A complete hexadecimal theme palette is required.")
@@ -101,7 +101,7 @@ final class ObsidianIntegration {
                 let current = try reader.text(at: css)
                 var backup = backups.first { $0.path == css.path } ?? PaletteFileBackup(path: css.path, format: "file", original: current)
                 try check(current, against: backup)
-                backup.previous = current; backup.applied = Self.css(theme)
+                backup.previous = current; backup.applied = Self.css(theme, current: current ?? "")
                 if !backups.contains(where: { $0.path == appearance.path }) {
                     backups.append(PaletteFileBackup(path: appearance.path, format: "obsidian-enabled", original: original,
                                           fields: [PaletteFieldBackup(path: ["enabledCssSnippets"], original: enabled.contains("mac-themes") ? "true" : "false", applied: "true")]))
@@ -115,7 +115,8 @@ final class ObsidianIntegration {
         }
         guard saved > 0 else { throw ThemeError.message(failures.joined(separator: "\n")) }
         let status = waiting == 0 ? "Applied · watched CSS in \(saved) vault(s)" : "Saved · Appearance → CSS snippets → Reload snippets, then enable mac-themes once in \(waiting) vault(s)"
-        return failures.isEmpty ? status : status + "; skipped \(failures.count): " + failures.joined(separator: "; ")
+        let detail = failures.isEmpty ? status : status + "; skipped \(failures.count): " + failures.joined(separator: "; ")
+        return waiting == 0 && failures.isEmpty ? .applied(detail) : .pending(detail)
     }
 
     private func check(_ current: String?, against backup: PaletteFileBackup) throws {
@@ -157,7 +158,7 @@ final class ObsidianIntegration {
         return "Restored · prior CSS and snippet selection"
     }
 
-    nonisolated static func css(_ t: Theme) -> String {
+    nonisolated static func css(_ t: Theme, current: String = "") -> String {
         var colors = [
             "background-primary": t.background, "background-primary-alt": t.background,
             "background-secondary": t.background, "background-secondary-alt": t.background,
@@ -178,6 +179,24 @@ final class ObsidianIntegration {
             "dropdown-background": t.background, "dropdown-background-hover": t.selection,
             "input-placeholder-color": t.foreground + "E6"
         ]
+        let fontKeys = ["font-interface-theme", "font-text-theme", "font-interface", "font-text", "font-monospace"]
+        if t.keepsFont {
+            for line in current.components(separatedBy: "\n") {
+                let value = line.trimmingCharacters(in: .whitespaces)
+                for key in fontKeys where value.hasPrefix("--\(key):") && value.hasSuffix(";") {
+                    colors[key] = String(value.dropFirst(key.count + 3).dropLast()).trimmingCharacters(in: .whitespaces)
+                }
+            }
+        } else if t.useDefaultFont == true {
+            colors["font-interface-theme"] = "var(--font-default)"
+            colors["font-text-theme"] = "var(--font-default)"
+            colors["font-interface"] = "var(--font-default)"
+            colors["font-text"] = "var(--font-default)"
+            colors["font-monospace"] = "var(--font-monospace-default)"
+        }
+        if let font = t.fontFamily {
+            for key in fontKeys { colors[key] = "\"\(font)\"" }
+        }
         if t.id == "tokyo-night", t.background == "#1a1b26", !t.isLight {
             // Omarchy's Tokyo Night dark/lighter surfaces distinguish navigation,
             // reading space, and controls without changing typography or layout.

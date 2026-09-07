@@ -8,9 +8,9 @@ import ThemeCore
     private var app: NSRunningApplication?
     private var root: AXUIElement?
 
-    func apply(_ theme: Theme, root support: URL) async throws -> String {
+    func apply(_ theme: Theme, root support: URL) async throws -> ApplyResult {
         guard let running = NSRunningApplication.runningApplications(withBundleIdentifier: Integration.brave.bundleID).first else {
-            return "Waiting · open Brave, then choose Apply theme"
+            return .pending("Waiting · open Brave, then choose Apply theme")
         }
         guard AXIsProcessTrusted() else {
             throw failure("Mac Themes needs app-control permission in Privacy & Security → \(ChatGPTAccessibility.permissionPane).")
@@ -114,7 +114,7 @@ import ThemeCore
                 // a posted close shortcut might still be queued.
             }
         }
-        return "Applied · Brave confirmed \(theme.name)"
+        return .applied("Applied · Brave confirmed \(theme.name)")
     }
 
     private var webArea: AXUIElement? {

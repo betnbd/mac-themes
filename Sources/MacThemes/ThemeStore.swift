@@ -8,6 +8,24 @@ import ThemeCore
 final class ThemeStore: ObservableObject {
     static let focusedIntegrations: [Integration] = [.ghostty, .obsidian, .brave, .chatgpt, .wallpaper, .macos]
     @Published var selected: Theme = Theme.all[0]
+    @Published private var fontSelections: [String: String] = [:]
+    var selectedFontID: String { fontSelections[selected.id] ?? "" }
+    var selectedFont: ThemeFont? { ThemeFont.all.first { $0.id == selectedFontID } }
+    var previewTheme: Theme {
+        var theme = selected
+        theme.fontFamily = selectedFont?.family
+        theme.useDefaultFont = selectedFontID == "default" ? true : nil
+        return theme
+    }
+    func selectFont(_ id: String) {
+        guard !busy, !importing, !restoring else { return }
+        guard id.isEmpty || id == "default" || ThemeFont.all.contains(where: { $0.id == id }) else { return }
+        fontSelections[selected.id] = id
+        if !demo { preferences.set(fontSelections, forKey: "fontSelections") }
+        selectedFont?.registerPreview()
+        previewOnly = true
+        message = "Font selected. Click Apply theme to use it."
+    }
     @Published var imported: [ImportedTheme] = []
     @Published var enabled = Set<Integration>()
     @Published var statuses: [Integration: String] = [:]
@@ -44,7 +62,7 @@ final class ThemeStore: ObservableObject {
     let root: URL
     let library: ThemeLibrary
     private var integrations: Integrations?
-    private var queuedTheme: Theme?
+    private var coordinator: ApplyCoordinator?
     private var chatGPTLaunchObserver: AnyCancellable?
     private var chatGPTLaunchedDuringApply = false
     private var wallpaperObservers = Set<AnyCancellable>()
@@ -76,10 +94,11 @@ final class ThemeStore: ObservableObject {
         let choices = wallpapers(for: theme)
         return choices.first { $0.id == id } ?? choices.first
     }
-    var canApply: Bool { !editingWallpapers && !importing && !restoring && (demo || integrations != nil) }
+    var canApply: Bool { !editingWallpapers && !importing && !restoring && (demo || (integrations != nil && coordinator != nil)) }
 
     init(demo: Bool = ThemeStore.isDemo, root suppliedRoot: URL? = nil, defaults: UserDefaults = .standard) {
         preferences = defaults
+        if !demo { fontSelections = defaults.dictionary(forKey: "fontSelections") as? [String: String] ?? [:] }
         self.demo = demo
         observesSpaces = !demo && suppliedRoot == nil
         shouldOpenSetupWindow = demo || !defaults.bool(forKey: "tokyoNightSetupSeen") || !defaults.bool(forKey: "automaticAppsSelected")
@@ -99,6 +118,11 @@ final class ThemeStore: ObservableObject {
             do {
                 let service = try Integrations(root: root)
                 integrations = service
+                hasBackups = service.hasBackups
+                coordinator = try ApplyCoordinator(root: root)
+                for (key, record) in coordinator?.records ?? [:] {
+                    if let app = Integration(rawValue: key) { statuses[app] = record.result.message }
+                }
                 previewOnly = true
                 if let saved = preferences.stringArray(forKey: "enabledIntegrations") {
                     enabled = Set(saved.compactMap(Integration.init(rawValue:))).intersection(Self.focusedIntegrations)
@@ -110,11 +134,15 @@ final class ThemeStore: ObservableObject {
                 hasBackups = service.hasBackups
             } catch { message = "Could not read restore data: \(error.localizedDescription)" }
         }
+        let initialSelection = selected.id
         Task {
             do {
                 if let wallpaperLibrary { wallpaperSnapshot = await wallpaperLibrary.snapshot() }
                 imported = try await library.installedThemes()
-                if let id = integrations?.state.activeTheme, let restored = themes.first(where: { $0.id == id }) { selected = restored }
+                if selected.id == initialSelection,
+                   let id = preferences.string(forKey: "previewThemeID") ?? integrations?.state.activeTheme,
+                   let restored = themes.first(where: { $0.id == id }) { selected = restored }
+                selectedFont?.registerPreview()
                 if suppliedRoot == nil { resumePendingChatGPT() }
                 scheduleWallpaperSync()
             } catch { message = "Could not read the theme library: \(error.localizedDescription)" }
@@ -207,7 +235,12 @@ final class ThemeStore: ObservableObject {
         guard desktop.hasPendingSpaceRestore || enabled.contains(.wallpaper) else { return }
         do {
             // Follow only the last explicitly applied wallpaper, never the preview.
-            if let result = try desktop.synchronizeCurrentSpaces() { statuses[.wallpaper] = result }
+            if let result = try desktop.synchronizeCurrentSpaces() {
+                let latest = coordinator?.records[Integration.wallpaper.rawValue]?.result.state
+                if desktop.hasPendingSpaceRestore || latest == nil || latest == .applied {
+                    statuses[.wallpaper] = result
+                }
+            }
         } catch { statuses[.wallpaper] = error.localizedDescription }
         hasBackups = integrations.hasBackups
         recordStatus()
@@ -215,56 +248,39 @@ final class ThemeStore: ObservableObject {
 
     func applySelected() {
         guard canApply, !busy else { return }
-        if demo { apply(selected); return }
-        let requested = selected
-        let pendingWallpaper = selectedWallpaper
-        previewOnly = false
-        if let pendingWallpaper {
-            wallpaperIDs[requested.id] = pendingWallpaper.id
-            preferences.set(wallpaperIDs, forKey: "wallpaperSelections")
-        }
-        previewWallpaperIDs.removeValue(forKey: requested.id)
-        apply(requested)
+        if demo { message = "Previewing \(selected.name)."; return }
+        let destinations = Self.focusedIntegrations.filter { enabled.contains($0) }
+        guard !destinations.isEmpty else { message = "Enable an application before applying."; return }
+        runApply(destinations: destinations)
     }
 
-    private func apply(_ theme: Theme) {
-        guard canApply else { return }
-        selected = theme
-        if demo || previewOnly { message = "Previewing \(theme.name)."; return }
-        guard !enabled.isEmpty else { message = "\(theme.name) selected · enable an application to apply it."; return }
-        queuedTheme = theme
-        guard !busy, let integrations else { return }
+    private func runApply(destinations: [Integration]) {
+        guard let integrations, let coordinator else { return }
+        let theme = previewTheme, wallpaper = selectedWallpaper, font = selectedFont
         busy = true
+        message = "Applying \(theme.name)…"
         Task { @MainActor in
-            while let requested = queuedTheme {
-                queuedTheme = nil
-                selected = requested
-                message = "Applying \(requested.name)…"
-                var attention = false
-                for app in Self.focusedIntegrations where enabled.contains(app) {
-                    if queuedTheme != nil { break }
-                    statuses[app] = "Applying…"
-                    await Task.yield()
-                    if queuedTheme != nil { break }
-                    do {
-                        let result: String
-                        if app == .wallpaper {
-                            if let wallpaper = selectedWallpaper(for: requested) { result = try integrations.desktop.applyWallpaper(wallpaper.url) }
-                            else { result = "No backgrounds included with this theme" }
-                        } else if app == .chatgpt { result = try await integrations.applyLiveChatGPT(requested) }
-                        else if app == .brave { result = try await integrations.applyLiveBrave(requested) }
-                        else { result = try integrations.apply(requested, to: app) }
-                        statuses[app] = result
-                        if !result.hasPrefix("Applied") { attention = true }
-                    } catch { statuses[app] = error.localizedDescription; attention = true }
+            do {
+                let report = try await coordinator.run(theme: theme, destinations: destinations,
+                    installFont: { try await Task.detached(priority: .utility) { try font?.install() }.value },
+                    apply: { destination, requested in
+                        switch destination {
+                        case .wallpaper:
+                            guard let wallpaper else { return .pending("Choose a wallpaper to apply.") }
+                            return .applied(try integrations.desktop.applyWallpaper(wallpaper.url))
+                        case .chatgpt: return try await integrations.applyLiveChatGPT(requested)
+                        case .brave: return try await integrations.applyLiveBrave(requested)
+                        default: return try integrations.apply(requested, to: destination)
+                        }
+                    }, progress: { self.statuses[$0] = $1.message })
+                if report.results[.wallpaper]?.state == .applied, let wallpaper {
+                    wallpaperIDs[theme.id] = wallpaper.id
+                    preferences.set(wallpaperIDs, forKey: "wallpaperSelections")
+                    previewWallpaperIDs.removeValue(forKey: theme.id)
                 }
-                if queuedTheme == nil {
-                    do {
-                        try integrations.remember(theme: requested)
-                        message = attention ? "\(requested.name) selected · check Setup & status to finish." : "\(requested.name) applied."
-                    } catch { message = "Could not save theme selection: \(error.localizedDescription)" }
-                }
-            }
+                previewOnly = !report.allApplied
+                message = report.summary(theme.name)
+            } catch { message = "Could not record application results: \(error.localizedDescription)" }
             hasBackups = integrations.hasBackups
             busy = false
             refreshAccessibilityPermission()
@@ -274,26 +290,30 @@ final class ThemeStore: ObservableObject {
 
     private func resumePendingChatGPT() {
         guard !demo, !busy, !importing, enabled.contains(.chatgpt),
-              let integrations, integrations.running(.chatgpt), let pending = integrations.liveChatGPT.pendingTheme else { return }
+              let integrations, let coordinator, integrations.running(.chatgpt), let pending = integrations.liveChatGPT.pendingTheme else { return }
         chatGPTLaunchedDuringApply = false
         busy = true
         Task { @MainActor in
-            do { statuses[.chatgpt] = try await integrations.applyLiveChatGPT(pending) }
+            do {
+                let font = ThemeFont.all.first { $0.family == pending.fontFamily }
+                _ = try await coordinator.run(theme: pending, destinations: [.chatgpt],
+                    installFont: { try await Task.detached(priority: .utility) { try font?.install() }.value },
+                    apply: { _, theme in try await integrations.applyLiveChatGPT(theme) },
+                    progress: { self.statuses[$0] = $1.message })
+            }
             catch { statuses[.chatgpt] = error.localizedDescription }
             hasBackups = integrations.hasBackups
             message = statuses[.chatgpt] ?? "Check ChatGPT setup."
             busy = false
             refreshAccessibilityPermission()
-            if let queued = queuedTheme {
-                queuedTheme = nil
-                apply(queued)
-            }
         }
     }
 
     func select(_ theme: Theme) {
         guard canApply, !busy else { return }
         selected = theme
+        if !demo { preferences.set(theme.id, forKey: "previewThemeID") }
+        selectedFont?.registerPreview()
         previewOnly = true
         message = "Previewing \(theme.name). Click Apply theme to use it."
     }
@@ -413,7 +433,6 @@ final class ThemeStore: ObservableObject {
 
     func restore() {
         guard !busy, !importing, let integrations else { return }
-        queuedTheme = nil
         busy = true
         restoring = true
         Task { @MainActor in
@@ -422,6 +441,9 @@ final class ThemeStore: ObservableObject {
                 await Task.yield()
                 do { statuses[app] = app == .chatgpt ? try await integrations.restoreLiveChatGPT() : try integrations.restore(app) }
                 catch { statuses[app] = error.localizedDescription; failures.append("\(app.name): \(error.localizedDescription)") }
+            }
+            for app in Self.focusedIntegrations where statuses[app]?.hasPrefix("Restored") == true {
+                do { try coordinator?.clear(app) } catch { failures.append(error.localizedDescription) }
             }
             do { try integrations.remember(theme: nil) } catch { failures.append(error.localizedDescription) }
             hasBackups = integrations.hasBackups
@@ -443,7 +465,7 @@ final class ThemeStore: ObservableObject {
 
     func copyChatGPTTheme() {
         do {
-            let text = try ChatGPTConfigEditor.shareString(selected)
+            let text = try ChatGPTConfigEditor.shareString(previewTheme)
             NSPasteboard.general.clearContents()
             NSPasteboard.general.setString(text, forType: .string)
             statuses[.chatgpt] = "Copied · paste into Appearance → Import"
@@ -460,19 +482,8 @@ final class ThemeStore: ObservableObject {
     }
 
     func applyBrowserTheme() {
-        guard !demo, !busy, !importing, let integrations else { return }
-        let theme = selected
-        busy = true
-        statuses[.brave] = "Applying…"
-        Task { @MainActor in
-            do { statuses[.brave] = try await integrations.applyLiveBrave(theme) }
-            catch { statuses[.brave] = error.localizedDescription }
-            hasBackups = integrations.hasBackups
-            message = statuses[.brave] ?? "Check Brave setup."
-            busy = false
-            recordStatus()
-            if let queued = queuedTheme { queuedTheme = nil; apply(queued) }
-        }
+        guard !demo, canApply, !busy else { return }
+        runApply(destinations: [.brave])
     }
 
     func chooseObsidianVaults() {

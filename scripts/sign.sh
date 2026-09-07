@@ -4,6 +4,14 @@
 set -euo pipefail
 umask 077
 APP="${1:?Usage: sign.sh path/to/app}"
+case "${MAC_THEMES_SIGNING:-local}" in
+  adhoc)
+    codesign --force --sign - --entitlements "${0:A:h}/entitlements.plist" "$APP"
+    codesign --verify --deep --strict "$APP"
+    exit 0 ;;
+  local) ;;
+  *) print -u2 'Unknown signing mode; use local or adhoc.'; exit 1 ;;
+esac
 SIGNING_DIR="$HOME/Library/Application Support/Mac Themes Signing"
 KEYCHAIN="$SIGNING_DIR/local-signing.keychain-db"
 CERTIFICATE="$SIGNING_DIR/certificate.pem"
