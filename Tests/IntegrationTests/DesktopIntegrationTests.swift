@@ -116,13 +116,18 @@ private func eventCode(_ value: String) -> UInt32 {
     let enumerator = try #require(FileManager.default.enumerator(at: source, includingPropertiesForKeys: nil))
     let images = enumerator.compactMap { $0 as? URL }.filter { ["jpg", "jpeg", "png", "webp", "heic"].contains($0.pathExtension.lowercased()) }
     #expect(images.count == 38)
+    let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    defer { try? FileManager.default.removeItem(at: root) }
     for url in images {
-        #expect(WallpaperImage.source(url) != nil, "Wallpaper exceeds decoder limits: \(url.lastPathComponent)")
         try autoreleasepool {
-            let bitmap = try #require(NSBitmapImageRep(data: Data(contentsOf: url)), "Cannot decode \(url.lastPathComponent)")
-            #expect(bitmap.pixelsWide > 0 && bitmap.pixelsHigh > 0)
-            let png = try #require(bitmap.representation(using: .png, properties: [:]), "Cannot convert \(url.lastPathComponent)")
-            #expect(png.starts(with: [137, 80, 78, 71, 13, 10, 26, 10]))
+            let cached = try WallpaperImage.cachedWallpaper(url, root: root)
+            #expect(WallpaperImage.preview(cached, maxPixelSize: 32) != nil)
+            if ["jpg", "jpeg", "png"].contains(url.pathExtension.lowercased()) {
+                #expect(try Data(contentsOf: cached) == Data(contentsOf: url))
+            } else {
+                #expect(try Data(contentsOf: cached).starts(with: [137, 80, 78, 71, 13, 10, 26, 10]))
+            }
+            #expect(try WallpaperImage.cachedWallpaper(url, root: root) == cached)
         }
     }
 }

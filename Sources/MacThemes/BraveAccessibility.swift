@@ -54,7 +54,7 @@ import ThemeCore
                       previousWeb.map({ !CFEqual($0, web) }) ?? true,
                       BraveThemeNavigation.isNewTab(self.elementURL(web)),
                       let address = self.addressField,
-                      (self.attribute(address, kAXValueAttribute) as? String)?.isEmpty == true else { return false }
+                      ((self.attribute(address, kAXValueAttribute) as? String) ?? "").isEmpty else { return false }
                 return true
             },
             enterURL: { url in

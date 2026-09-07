@@ -20,7 +20,7 @@ replaces a destination's last successful theme; browsing is saved separately.
 | --- | --- |
 | Ghostty | Writes a managed palette and requests a live configuration reload. If unavailable, use Reload Configuration or reopen Ghostty. |
 | Obsidian | Choose your vaults, apply, then enable **mac-themes** under Settings → Appearance → CSS snippets. Subsequent changes refresh automatically. |
-| Brave | Enable Developer mode at `brave://extensions` and grant Mac Themes Accessibility permission. Keep Brave open and focused while its native theme loader runs. |
+| Brave | Enable Developer mode at `brave://extensions` and grant Mac Themes Accessibility permission. Apply opens Brave if necessary; keep it focused while its native theme loader runs. |
 | ChatGPT | Grant Accessibility permission. Mac Themes uses the app's Appearance import controls; a pending theme applies when the app opens. Requires the English interface with custom theme import. Manual copy/import is also available. |
 | Wallpaper | Applies to connected displays and follows Spaces as you visit them while Mac Themes stays open. |
 | macOS appearance | Optional light/dark mode, nearest native accent and custom highlight where supported. |
@@ -134,3 +134,7 @@ only the seven curated themes and their wallpapers are packaged.
 Upstream revisions and attribution are recorded in `Vendor/Omarchy/origin.json`,
 `Vendor/Omarchy/backgrounds-origin.json` and `Vendor/Omarchy/LICENSE`.
 Theme and wallpaper rights remain with their respective authors.
+
+Apply saves Ghostty and Obsidian settings even while they are closed. Brave and
+ChatGPT open automatically when needed to apply through their appearance controls.
+They remain open afterward. Browsing themes never launches applications.

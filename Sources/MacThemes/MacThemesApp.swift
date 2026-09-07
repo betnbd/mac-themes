@@ -359,6 +359,7 @@ private struct WallpaperThumbnail: View {
             }.frame(width: bounds.size.width, height: bounds.size.height).clipped()
         }.contentShape(Rectangle())
             .task(id: url) { thumbnail.load(url, maxPixelSize: maxPixelSize) }
+            .onDisappear { thumbnail.clear() }
     }
 }
 
@@ -367,6 +368,11 @@ private final class WallpaperThumbnailImage: ObservableObject {
     @Published var image: NSImage?
     private var loadedURL: URL?
     private var loadedSize = 0
+    func clear() {
+        image = nil
+        loadedURL = nil
+        loadedSize = 0
+    }
     func load(_ url: URL?, maxPixelSize: Int) {
         guard loadedURL != url || loadedSize != maxPixelSize else { return }
         loadedURL = url

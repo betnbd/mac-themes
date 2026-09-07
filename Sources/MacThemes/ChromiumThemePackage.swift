@@ -30,6 +30,14 @@ enum ChromiumThemePackage {
         // The bundled palette's darker surface separates inactive tabs from the
         // toolbar. Other palettes keep their own background unchanged.
         let frame = theme.id == "tokyo-night" && theme.background.lowercased() == "#1a1b26" ? "#13141c" : theme.background
+        // Terminal selection colors can be bright accents (e.g. The Navigator's
+        // gold), not readable input surfaces with the palette's normal text.
+        let foreground = rgb(theme.foreground)
+        let selection = rgb(theme.selection)
+        let background = rgb(theme.background)
+        let omnibox = contrast(foreground, selection) >= 4.5 ? selection : background
+        let text = contrast(foreground, omnibox) >= 4.5 ? foreground
+            : (contrast([0, 0, 0], omnibox) >= 4.5 ? [0, 0, 0] : [255, 255, 255])
         let colors: [String: [Int]] = [
             "frame": rgb(frame),
             "frame_inactive": rgb(frame),
@@ -46,8 +54,8 @@ enum ChromiumThemePackage {
             "ntp_text": rgb(theme.foreground),
             "ntp_link": rgb(theme.accent),
             "button_background": rgb(theme.selection),
-            "omnibox_background": rgb(theme.selection),
-            "omnibox_text": rgb(theme.foreground)
+            "omnibox_background": omnibox,
+            "omnibox_text": text
         ]
         return try JSONSerialization.data(withJSONObject: [
             "manifest_version": 3,
@@ -56,6 +64,18 @@ enum ChromiumThemePackage {
             "description": "A coordinated Omarchy palette for your browser.",
             "theme": ["colors": colors]
         ], options: [.prettyPrinted, .sortedKeys])
+    }
+
+    private static func contrast(_ a: [Int], _ b: [Int]) -> Double {
+        func luminance(_ rgb: [Int]) -> Double {
+            let linear = rgb.map { channel -> Double in
+                let value = Double(channel) / 255
+                return value <= 0.04045 ? value / 12.92 : pow((value + 0.055) / 1.055, 2.4)
+            }
+            return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722
+        }
+        let x = luminance(a), y = luminance(b)
+        return (max(x, y) + 0.05) / (min(x, y) + 0.05)
     }
 
     static func write(_ theme: Theme, to directory: URL) throws {

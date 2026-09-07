@@ -81,3 +81,24 @@ private func luminance(_ rgb: [Int]) -> Double {
     }
     return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722
 }
+
+@Test func browserAddressBarHandlesAccentSelectionsAndLowContrastImports() throws {
+    let fixtures = [
+        ("#232220", "#a9a49f", "#d1b187"), // The Navigator screenshot
+        ("#ffffff", "#333333", "#222222"), // Light theme with dark selection
+        ("#777777", "#777777", "#777777")  // Imported palette with unreadable text
+    ]
+    for (background, foreground, selection) in fixtures {
+        let theme = Theme(id: "import", name: "Import", subtitle: "", background: background,
+                          foreground: foreground, accent: selection, selection: selection,
+                          cursor: foreground, palette: Array(repeating: background, count: 16))
+        let manifest = try #require(JSONSerialization.jsonObject(with: ChromiumThemePackage.manifest(theme)) as? [String: Any])
+        let body = try #require(manifest["theme"] as? [String: Any])
+        let colors = try #require(body["colors"] as? [String: [Int]])
+        let surface = try #require(colors["omnibox_background"])
+        #expect(surface == ScriptLiteral.rgb(background).map { $0 / 257 })
+        let a = luminance(try #require(colors["omnibox_text"]))
+        let b = luminance(surface)
+        #expect((max(a, b) + 0.05) / (min(a, b) + 0.05) >= 4.5)
+    }
+}

@@ -32,6 +32,40 @@ enum WallpaperImage {
         return source
     }
 
+    /// Preserve native JPEG/PNG bytes instead of decoding up to 200 MB of pixels.
+    /// Other ImageIO formats still become PNG for desktop compatibility, written
+    /// directly to disk so an additional encoded image isn't retained in memory.
+    static func cachedWallpaper(_ original: URL, root: URL) throws -> URL {
+        try autoreleasepool {
+            guard let source = source(original) else {
+                throw ThemeError.message("This wallpaper cannot be decoded or exceeds the 50-megapixel image limit.")
+            }
+            let data = try Data(contentsOf: original, options: .mappedIfSafe)
+            let digest = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+            let type = CGImageSourceGetType(source) as String?
+            let native = type == "public.jpeg" || type == "public.png"
+            let directory = root.appendingPathComponent("Wallpapers")
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            let target = directory.appendingPathComponent(digest + (type == "public.jpeg" ? ".jpg" : ".png"))
+            guard !FileManager.default.fileExists(atPath: target.path) else { return target }
+            if native {
+                try data.write(to: target, options: .atomic)
+            } else {
+                let temporary = directory.appendingPathComponent(UUID().uuidString + ".png")
+                defer { try? FileManager.default.removeItem(at: temporary) }
+                guard let destination = CGImageDestinationCreateWithURL(temporary as CFURL, "public.png" as CFString, 1, nil) else {
+                    throw ThemeError.message("macOS cannot create a background image.")
+                }
+                CGImageDestinationAddImageFromSource(destination, source, 0, nil)
+                guard CGImageDestinationFinalize(destination) else {
+                    throw ThemeError.message("macOS cannot decode this background image.")
+                }
+                try FileManager.default.moveItem(at: temporary, to: target)
+            }
+            return target
+        }
+    }
+
     static func preview(_ url: URL, maxPixelSize: Int = 1000) -> NSImage? {
         guard let source = source(url), let thumbnail = CGImageSourceCreateThumbnailAtIndex(source, 0, [
             kCGImageSourceCreateThumbnailFromImageAlways: true,
@@ -206,16 +240,7 @@ final class DesktopIntegration {
     }
 
     func applyWallpaper(_ original: URL) throws -> String {
-        guard WallpaperImage.source(original) != nil else { throw ThemeError.message("This wallpaper cannot be decoded or exceeds the 50-megapixel image limit.") }
-        let data = try Data(contentsOf: original)
-        let digest = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
-        let cache = root.appendingPathComponent("Wallpapers")
-        try FileManager.default.createDirectory(at: cache, withIntermediateDirectories: true)
-        let imageURL = cache.appendingPathComponent("\(digest).png")
-        if !FileManager.default.fileExists(atPath: imageURL.path) {
-            guard let image = NSBitmapImageRep(data: data), let png = image.representation(using: .png, properties: [:]) else { throw ThemeError.message("macOS cannot decode this background image.") }
-            try png.write(to: imageURL, options: .atomic)
-        }
+        let imageURL = try WallpaperImage.cachedWallpaper(original, root: root)
         state.followingWallpaper = imageURL.path
         state.followingWallpaperSource = original.path
         state.restoringSpaces = false

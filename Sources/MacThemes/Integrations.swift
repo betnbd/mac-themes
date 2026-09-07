@@ -106,6 +106,7 @@ final class Integrations {
     var hasBackups: Bool { state.ghosttyPath != nil || !state.terminal.isEmpty || state.braveCaptured || state.braveLiveTheme != nil || state.chatgpt != nil || state.chatgptPending != nil || desktop.hasBackups || obsidian.hasBackups || liveChatGPT.hasBackups || legacyHasBackups }
 
     func applyLiveBrave(_ theme: Theme) async throws -> ApplyResult {
+        try await openForAppearance(.brave)
         let result = try await BraveAccessibility().apply(theme, root: root)
         if result.state == .applied {
             state.braveLiveTheme = theme.name
@@ -119,7 +120,26 @@ final class Integrations {
             throw ThemeError.message("Restore the older ChatGPT configuration backup before using live Appearance automation.")
         }
         if case .apply = state.chatgptPending { state.chatgptPending = nil; try save() }
+        try await openForAppearance(.chatgpt)
         return try await liveChatGPT.apply(theme)
+    }
+
+    /// Called only by Apply for integrations that require native appearance UI.
+    private func openForAppearance(_ integration: Integration) async throws {
+        guard !running(integration) else { return }
+        guard let url = appURL(integration) else {
+            throw ThemeError.message("Not installed · \(integration.name)")
+        }
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.activates = false
+        let application = try await NSWorkspace.shared.openApplication(at: url, configuration: configuration)
+        let deadline = Date().addingTimeInterval(15)
+        while !application.isFinishedLaunching && !application.isTerminated && Date() < deadline {
+            try await Task.sleep(for: .milliseconds(100))
+        }
+        guard application.isFinishedLaunching && !application.isTerminated else {
+            throw ThemeError.message("\(integration.name) did not finish opening. Try Apply again once it is ready.")
+        }
     }
 
     func restoreLiveChatGPT() async throws -> String {
@@ -233,7 +253,7 @@ final class Integrations {
     }
 
     private func reloadGhostty() throws -> ApplyResult {
-        guard running(.ghostty) else { return .pending("Saved · takes effect when Ghostty opens") }
+        guard running(.ghostty) else { return .applied("Applied · saved for the next time Ghostty opens") }
         do {
             let result = try AppleScripts.run(AppleScripts.ghosttyReload)
             guard result.booleanValue else { return .pending("Saved · use Ghostty → Reload Configuration") }
