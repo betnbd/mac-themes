@@ -1,0 +1,310 @@
+{
+  "repository": "https://github.com/omacom/omarchy",
+  "commit": "a62e34ea8e04f0aadb68e9ab6136b7fd475ad06d",
+  "files": [
+    {
+      "path": "themes/catppuccin-latte/backgrounds/1-color-fade.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c3bb70530328d3ed5f188e7986d53fd66423c896",
+      "size": 10126,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/c3bb70530328d3ed5f188e7986d53fd66423c896"
+    },
+    {
+      "path": "themes/catppuccin-latte/backgrounds/omarchy.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4a35c762b985df2b69913c1b14dd2222b09f2b01",
+      "size": 714,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/4a35c762b985df2b69913c1b14dd2222b09f2b01"
+    },
+    {
+      "path": "themes/catppuccin/backgrounds/1-totoro.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7005d31c3cce94302c4250b4b348a8454f2617e8",
+      "size": 46504,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/7005d31c3cce94302c4250b4b348a8454f2617e8"
+    },
+    {
+      "path": "themes/catppuccin/backgrounds/2-waves.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a7cc4d4d7dff60ce07e9b2187f40dcfdb6833f82",
+      "size": 639444,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/a7cc4d4d7dff60ce07e9b2187f40dcfdb6833f82"
+    },
+    {
+      "path": "themes/catppuccin/backgrounds/3-blue-eye.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5030f368087720c98e36111a87de5d270d2a45e6",
+      "size": 217056,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/5030f368087720c98e36111a87de5d270d2a45e6"
+    },
+    {
+      "path": "themes/catppuccin/backgrounds/omarchy.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "892c957f09322cc17de1e259c63f427bc9d83c51",
+      "size": 716,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/892c957f09322cc17de1e259c63f427bc9d83c51"
+    },
+    {
+      "path": "themes/everforest/backgrounds/1-tree-tops.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "04e48e8a4ed6cc51a5d9dbf709c167e663ecc3a4",
+      "size": 221494,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/04e48e8a4ed6cc51a5d9dbf709c167e663ecc3a4"
+    },
+    {
+      "path": "themes/everforest/backgrounds/omarchy.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "191773366e226ede09cf1804591101f98f36b114",
+      "size": 716,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/191773366e226ede09cf1804591101f98f36b114"
+    },
+    {
+      "path": "themes/gruvbox/backgrounds/1-the-backwater.jpg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c9ff53168abfb50ca01239a118f24637ff43407d",
+      "size": 4127598,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/c9ff53168abfb50ca01239a118f24637ff43407d"
+    },
+    {
+      "path": "themes/gruvbox/backgrounds/2-flower-basket.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c8648eff63fc9b905a013c2eda05fdf4c21e3e93",
+      "size": 1038098,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/c8648eff63fc9b905a013c2eda05fdf4c21e3e93"
+    },
+    {
+      "path": "themes/gruvbox/backgrounds/3-village-square.jpg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0ff0160bc44d4144217d2db7ddb8a6789070252e",
+      "size": 1924485,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/0ff0160bc44d4144217d2db7ddb8a6789070252e"
+    },
+    {
+      "path": "themes/gruvbox/backgrounds/4-idyllic-procession.jpg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3742024aa03cc047a5771cb98f392c67c1259af5",
+      "size": 1908429,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/3742024aa03cc047a5771cb98f392c67c1259af5"
+    },
+    {
+      "path": "themes/gruvbox/backgrounds/5-leaves.jpg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fd318699368b48c20792732d30e39234bf43052e",
+      "size": 443959,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/fd318699368b48c20792732d30e39234bf43052e"
+    },
+    {
+      "path": "themes/gruvbox/backgrounds/omarchy.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "540b7d05954c6485c115a900acf8c08e0860dab8",
+      "size": 716,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/540b7d05954c6485c115a900acf8c08e0860dab8"
+    },
+    {
+      "path": "themes/nord/backgrounds/0-black-moon.jpg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "55df377484f1c5aaa0a376026f21720c015d560e",
+      "size": 3255290,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/55df377484f1c5aaa0a376026f21720c015d560e"
+    },
+    {
+      "path": "themes/nord/backgrounds/1-city-view.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0dbc4b9e1e43a0d539f0a2742eb0a6f435d5257f",
+      "size": 355776,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/0dbc4b9e1e43a0d539f0a2742eb0a6f435d5257f"
+    },
+    {
+      "path": "themes/nord/backgrounds/2-night-hawks.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f8bbcb4cdde655b118f35da224376cf88e8e35b8",
+      "size": 697878,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/f8bbcb4cdde655b118f35da224376cf88e8e35b8"
+    },
+    {
+      "path": "themes/nord/backgrounds/omarchy.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1bd6d5306e55278c5851bec16fc7e72e96e28a42",
+      "size": 716,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/1bd6d5306e55278c5851bec16fc7e72e96e28a42"
+    },
+    {
+      "path": "themes/tokyo-night/backgrounds/0-winding-road.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2f1f8d539f9b5fb1cb170e0f154386cdc730dc58",
+      "size": 653482,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/2f1f8d539f9b5fb1cb170e0f154386cdc730dc58"
+    },
+    {
+      "path": "themes/tokyo-night/backgrounds/1-quattro.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "af001763e71cbe30c25f7057dc075fccc8687a68",
+      "size": 625422,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/af001763e71cbe30c25f7057dc075fccc8687a68"
+    },
+    {
+      "path": "themes/tokyo-night/backgrounds/2-swirl-buck.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ba6f8922e98a1581c316b253985ae00e282c4745",
+      "size": 344156,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/ba6f8922e98a1581c316b253985ae00e282c4745"
+    },
+    {
+      "path": "themes/tokyo-night/backgrounds/3-sunset-lake.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "159921971a8571c491be7cc9bab0df74ec1d04ed",
+      "size": 364966,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/159921971a8571c491be7cc9bab0df74ec1d04ed"
+    },
+    {
+      "path": "themes/tokyo-night/backgrounds/4-omakub.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "70a4710a492af2ebd5677c3bcaf8ffa1f7bac2ad",
+      "size": 184050,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/70a4710a492af2ebd5677c3bcaf8ffa1f7bac2ad"
+    },
+    {
+      "path": "themes/tokyo-night/backgrounds/5-oma-cityscape.jpg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f57916bb2e70cd910255fd23e02b6614bc7ddace",
+      "size": 1408419,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/f57916bb2e70cd910255fd23e02b6614bc7ddace"
+    },
+    {
+      "path": "themes/tokyo-night/backgrounds/6-oma.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6875c007f9caa475120e8b64c275843277346a51",
+      "size": 280578,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/6875c007f9caa475120e8b64c275843277346a51"
+    },
+    {
+      "path": "themes/tokyo-night/backgrounds/omarchy.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f46181625cbf23e38b61576be93813f347ff8b8e",
+      "size": 716,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/f46181625cbf23e38b61576be93813f347ff8b8e"
+    },
+    {
+      "path": "themes/hackerman/backgrounds/1-synth-scape.jpg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7a36f6aabed18a4d6ad9f01fdaabd498ba868701",
+      "size": 2330372,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/7a36f6aabed18a4d6ad9f01fdaabd498ba868701"
+    },
+    {
+      "path": "themes/hackerman/backgrounds/2-geometric.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c1ca030993d538ca4e6c38c4bcc94b57af0b9845",
+      "size": 685254,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/c1ca030993d538ca4e6c38c4bcc94b57af0b9845"
+    },
+    {
+      "path": "themes/hackerman/backgrounds/omarchy.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "77f3554c78328cedd9bdfdaa530bff4b42131880",
+      "size": 716,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/77f3554c78328cedd9bdfdaa530bff4b42131880"
+    },
+    {
+      "path": "themes/osaka-jade/backgrounds/1-glowing-city.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1192298433645b2b6c336daf1f770e37d1073af9",
+      "size": 313622,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/1192298433645b2b6c336daf1f770e37d1073af9"
+    },
+    {
+      "path": "themes/osaka-jade/backgrounds/2-shaded-entrance.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f7ce00110aaa66706a4dfda7c132e45ff7ff6053",
+      "size": 504030,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/f7ce00110aaa66706a4dfda7c132e45ff7ff6053"
+    },
+    {
+      "path": "themes/osaka-jade/backgrounds/3-mountain-moon.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "65490f2e0dad182801bd171d595bbd80a4be00aa",
+      "size": 327058,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/65490f2e0dad182801bd171d595bbd80a4be00aa"
+    },
+    {
+      "path": "themes/osaka-jade/backgrounds/omarchy.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7192ffcdf13d48e1b65443dcfdb71577b06e3169",
+      "size": 716,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/7192ffcdf13d48e1b65443dcfdb71577b06e3169"
+    },
+    {
+      "path": "themes/solitude/backgrounds/1-on-pole.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6c9b09da269bb28702bbc6f2c98cc83f9baf24ef",
+      "size": 1487492,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/6c9b09da269bb28702bbc6f2c98cc83f9baf24ef"
+    },
+    {
+      "path": "themes/solitude/backgrounds/2-wreakage.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a64cc295b3eb7a3cc7c8a8bea99a7f679728636d",
+      "size": 1153372,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/a64cc295b3eb7a3cc7c8a8bea99a7f679728636d"
+    },
+    {
+      "path": "themes/solitude/backgrounds/3-climb.jpg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "678e4e690f353156a91d0c37a310c4c574b59d67",
+      "size": 2510503,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/678e4e690f353156a91d0c37a310c4c574b59d67"
+    },
+    {
+      "path": "themes/solitude/backgrounds/4-ether.webp",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4cfc3b282d978a8682d0609bd7eb107bfc55d057",
+      "size": 581468,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/4cfc3b282d978a8682d0609bd7eb107bfc55d057"
+    },
+    {
+      "path": "themes/solitude/backgrounds/5-eyed.jpg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b8bd7be066cf6ecdff0a3b833bc6fccae7b8beab",
+      "size": 2178852,
+      "url": "https://api.github.com/repos/omacom/omarchy/git/blobs/b8bd7be066cf6ecdff0a3b833bc6fccae7b8beab"
+    }
+  ]
+}

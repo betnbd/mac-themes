@@ -1,0 +1,16 @@
+{
+  "repository": "https://github.com/omacom/omarchy",
+  "branch": "quattro",
+  "commit": "a62e34ea8e04f0aadb68e9ab6136b7fd475ad06d",
+  "themes": [
+    "tokyo-night",
+    "catppuccin",
+    "catppuccin-latte",
+    "nord",
+    "gruvbox",
+    "everforest",
+    "osaka-jade",
+    "hackerman",
+    "solitude"
+  ]
+}
