@@ -3,8 +3,15 @@ import SwiftUI
 import ThemeCore
 
 @main
+@MainActor
 struct MacThemesApp: App {
-    @StateObject private var store = ThemeStore()
+    @StateObject private var store: ThemeStore
+
+    init() {
+        // Keep actor-isolated initialization outside StateObject's autoclosure.
+        let initialStore = ThemeStore(demo: ThemeStore.isDemo)
+        _store = StateObject(wrappedValue: initialStore)
+    }
     var body: some Scene {
         MenuBarExtra {
             LauncherMenu(store: store)
