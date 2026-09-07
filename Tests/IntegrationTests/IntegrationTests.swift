@@ -7,8 +7,7 @@ import ThemeCore
 @Test @MainActor func automationScriptsCompileWithoutExecution() throws {
     let colors = TerminalColors(name: "Profile with \"quotes\" and \\ backslash", background: [100, 200, 300], text: [400, 500, 600], bold: [700, 800, 900], cursor: [1000, 1100, 1200])
     let applied = TerminalColors(name: colors.name, background: [0, 0, 0], text: [65535, 65535, 65535], bold: [65535, 65535, 65535], cursor: [65535, 0, 0])
-    let commands = [AppleScripts.ghosttyReload,
-                    AppleScripts.restoreTerminalColors(TerminalBackup(original: colors, applied: applied))]
+    let commands = [AppleScripts.restoreTerminalColors(TerminalBackup(original: colors, applied: applied))]
     for source in commands {
         let script = try #require(NSAppleScript(source: source))
         var error: NSDictionary?
@@ -104,4 +103,11 @@ import ThemeCore
     guard FileManager.default.isExecutableFile(atPath: executable.path) else { return }
     let editor = try ChatGPTConfigEditor(executable: executable, source: "[desktop]\n")
     #expect(throws: (any Error).self) { try editor.replacing(["unrelatedSetting": true]) }
+}
+
+@Test(.enabled(if: FileManager.default.fileExists(atPath: "/Applications/Ghostty.app"), "Requires Ghostty's installed scripting dictionary"))
+@MainActor func ghosttyScriptCompilesWithoutExecutionWhenInstalled() throws {
+    let script = try #require(NSAppleScript(source: AppleScripts.ghosttyReload))
+    var error: NSDictionary?
+    #expect(script.compileAndReturnError(&error), "\(error?.description ?? "Script failed to compile")")
 }

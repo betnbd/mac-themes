@@ -3,9 +3,11 @@ import Foundation
 enum BoundedFileReadError: LocalizedError {
     case timedOut(String)
     case stillPending(String)
+    case capacityReached
 
     var errorDescription: String? {
         switch self {
+        case .capacityReached: "Too many files are waiting on their file providers. Make them available locally, then retry."
         case .timedOut(let name): "Reading \(name) timed out. Make the file available locally in Finder, then try again."
         case .stillPending(let name): "\(name) is still waiting on its file provider. Make it available locally before trying again."
         }
@@ -54,10 +56,16 @@ final class BoundedFileReader: @unchecked Sendable {
             lock.unlock()
             throw BoundedFileReadError.stillPending(url.lastPathComponent)
         }
+        guard pending.count < 32 else {
+            lock.unlock()
+            throw BoundedFileReadError.capacityReached
+        }
         pending[key] = request
         lock.unlock()
 
-        DispatchQueue.global(qos: .utility).async { [self] in
+        // A dedicated, capped worker can progress even when Swift's cooperative
+        // executor is saturated by callers synchronously waiting for their reads.
+        Thread.detachNewThread { [self] in
             let result = Result { try loader(url) }
             lock.lock()
             if pending[key] === request { pending.removeValue(forKey: key) }

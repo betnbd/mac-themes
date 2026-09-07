@@ -5,9 +5,10 @@ import ThemeCore
 
 private final class ReadProbe: @unchecked Sendable {
     let release = DispatchSemaphore(value: 0)
+    let started = DispatchSemaphore(value: 0)
     private let lock = NSLock()
     private var count = 0
-    func next() -> Int { lock.lock(); defer { lock.unlock() }; count += 1; return count }
+    func next() -> Int { lock.lock(); defer { lock.unlock() }; count += 1; started.signal(); return count }
     var calls: Int { lock.lock(); defer { lock.unlock() }; return count }
 }
 
@@ -25,6 +26,7 @@ private final class ReadProbe: @unchecked Sendable {
     let start = Date()
     #expect(throws: BoundedFileReadError.self) { try reader.text(at: url) }
     #expect(Date().timeIntervalSince(start) < 1)
+    #expect(probe.started.wait(timeout: .now() + 2) == .success)
     #expect(probe.calls == 1)
     for _ in 0..<5 { #expect(throws: BoundedFileReadError.self) { try reader.text(at: url) } }
     #expect(probe.calls == 1)
@@ -59,6 +61,7 @@ private final class ReadProbe: @unchecked Sendable {
     #expect(!service.hasBackups)
     #expect(!FileManager.default.fileExists(atPath: root.path))
     #expect(throws: BoundedFileReadError.self) { try service.apply(Theme.all[1], to: .obsidian) }
+    #expect(probe.started.wait(timeout: .now() + 2) == .success)
     #expect(probe.calls == 1)
     probe.release.signal()
     let finish = Date().addingTimeInterval(1)
@@ -72,4 +75,24 @@ private final class ReadProbe: @unchecked Sendable {
     #expect(probe.calls == 2)
     #expect(service.hasBackups)
     #expect(FileManager.default.fileExists(atPath: vault.appendingPathComponent(".obsidian/snippets/mac-themes.css").path))
+}
+
+@Test func stalledFileProvidersCannotCreateUnboundedWorkers() throws {
+    let release = DispatchSemaphore(value: 0)
+    let reader = BoundedFileReader(timeout: 0.005) { _ in
+        release.wait()
+        return Data()
+    }
+    defer { for _ in 0..<32 { release.signal() } }
+    for index in 0..<32 {
+        #expect(throws: BoundedFileReadError.self) {
+            try reader.data(at: URL(fileURLWithPath: "/fixture/stalled/\(index)"))
+        }
+    }
+    #expect(reader.pendingReadCount == 32)
+    do {
+        _ = try reader.data(at: URL(fileURLWithPath: "/fixture/stalled/overflow"))
+        Issue.record("Expected the worker cap to reject another stalled read")
+    } catch BoundedFileReadError.capacityReached {}
+    #expect(reader.pendingReadCount == 32)
 }
