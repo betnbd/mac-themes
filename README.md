@@ -1,8 +1,78 @@
-# Mac Themes
+<p align="center">
+  <img src="Assets/AppIcon.png" width="112" alt="Mac Themes app icon">
+</p>
+<h1 align="center">Mac Themes</h1>
+<p align="center"><strong>A coordinated look for your Mac, from the menu bar.</strong></p>
+<p align="center">macOS 15+ · SwiftUI & AppKit · Seven curated themes</p>
+<p align="center"><a href="#install">Install</a> · <a href="#get-started">Get started</a> · <a href="docs/IMPORTS.md">Import themes</a> · <a href="#inspired-by-omarchy">Omarchy & credits</a></p>
 
 A native macOS menu-bar app for coordinating wallpapers and application colors.
 Version **1.2.0** includes seven themes and 32 wallpapers: Tokyo Night, Gruvbox,
 Osaka Jade, Hackerman, Catppuccin Mocha, Solitude and Everforest.
+
+Choose a palette, pair it with a wallpaper, and bring supported apps into the
+same visual world. Preview first, apply when ready, and restore previous settings
+when you want to go back.
+
+## Inspired by Omarchy
+
+Mac Themes is a small homage to [Omarchy](https://omarchy.org/): the care put into
+a desktop where the wallpaper, terminal, and applications feel like they belong
+together. Thanks to DHH, the [Omarchy contributors](https://github.com/omacom/omarchy),
+and the theme and wallpaper authors for that inspiration and the upstream work
+that makes this collection possible.
+
+This is an independent macOS project. Bundled Omarchy palettes and wallpapers
+retain their upstream [license](Vendor/Omarchy/LICENSE),
+[revision metadata](Vendor/Omarchy/origin.json), and
+[wallpaper provenance](Vendor/Omarchy/backgrounds-origin.json).
+
+## Install
+
+**Requirements:** macOS 15 or later, Git, Python 3, and a Swift 6 toolchain
+(with the macOS SDK). The default local signer also needs OpenSSL with support
+for `req -addext` and `pkcs12 -legacy`; see
+[signing setup](docs/SIGNING-AND-PERMISSIONS.md).
+
+### Build from source
+
+```sh
+git clone https://github.com/betnbd/mac-themes.git
+cd mac-themes
+zsh scripts/build.sh
+open "$HOME/Library/Caches/MacThemes/Products/Mac Themes.app"
+```
+
+The build creates the app and a persistent local signing identity. It does not
+apply a theme. Quit any older Mac Themes instance before opening the new build.
+
+### Keep it in Applications
+
+After building, quit Mac Themes and install the verified bundle in your personal
+Applications folder using the included replacement helper:
+
+```sh
+python3 scripts/replace-app.py   "$HOME/Library/Caches/MacThemes/Products/Mac Themes.app"   "$HOME/Applications/Mac Themes.app"
+open "$HOME/Applications/Mac Themes.app"
+```
+
+Run these commands from the repository root. To update, run `git pull --ff-only`,
+build again, quit the running app, and repeat the replacement command. Existing
+bundles are archived by the helper; your theme settings remain in Application Support.
+
+### Try the isolated preview
+
+After building, explore the standalone preview without changing your desktop or
+other apps:
+
+```sh
+open "$HOME/Library/Caches/MacThemes/Products/Mac Themes Preview.app"
+```
+
+**Download status:** there is currently no published GitHub release or Homebrew
+cask. The build also creates `dist/Mac Themes.zip`, which is locally signed and
+**not notarized**. Source builds are the available installation route.
+[Release documentation](docs/RELEASE.md) covers packaging and notarization.
 
 ## Get started
 
@@ -138,3 +208,14 @@ Theme and wallpaper rights remain with their respective authors.
 Apply saves Ghostty and Obsidian settings even while they are closed. Brave and
 ChatGPT open automatically when needed to apply through their appearance controls.
 They remain open afterward. Browsing themes never launches applications.
+
+## License and acknowledgments
+
+A project-level license has not yet been added for the original Mac Themes code.
+Bundled third-party materials retain their own licenses; see
+[Omarchy](Vendor/Omarchy/LICENSE), [Nerd Fonts](Vendor/NerdFonts/LICENSE), and each
+font family's license in `Vendor/NerdFonts`. Theme and wallpaper rights remain
+with their respective authors.
+
+Built by [Ben](https://github.com/betnbd). Also see
+[Display Wizard](https://github.com/betnbd/display-wizard) for brightness and scaling.
