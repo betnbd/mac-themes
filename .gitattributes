@@ -1,0 +1,6 @@
+# Preserve upstream assets and license bytes exactly for provenance verification.
+Vendor/** -text -whitespace
+*.ttf binary
+*.png binary
+*.jpg binary
+*.webp binary
