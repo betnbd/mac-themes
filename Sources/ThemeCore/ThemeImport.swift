@@ -201,7 +201,13 @@ public enum ThemePaletteConverter {
     }
     private static func mix(_ start: String, with end: String, fraction: Double) -> String {
         let a = ScriptLiteral.rgb(start), b = ScriptLiteral.rgb(end)
-        return "#" + zip(a, b).map { String(format: "%02x", Int((Double($0) / 257 * (1 - fraction) + Double($1) / 257 * fraction).rounded())) }.joined()
+        let channels: [String] = zip(a, b).map { pair in
+            let startValue = Double(pair.0) / 257.0
+            let endValue = Double(pair.1) / 257.0
+            let blended = startValue * (1.0 - fraction) + endValue * fraction
+            return String(format: "%02x", Int(blended.rounded()))
+        }
+        return "#" + channels.joined()
     }
 }
 

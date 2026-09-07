@@ -140,7 +140,13 @@ enum OmarchyToolPalette {
         guard t.palette.count == 16, (t.palette + [t.background, t.foreground, t.accent, t.selection, t.cursor]).allSatisfy({ $0.range(of: "^#[0-9a-fA-F]{6}$", options: .regularExpression) != nil }) else { throw ThemeError.message("A complete RGB palette is required for CLI themes.") }
     }
     static func mix(_ a: String, _ b: String, _ amount: Double) -> String {
-        "#" + zip(ScriptLiteral.rgb(a), ScriptLiteral.rgb(b)).map { String(format: "%02x", Int((Double($0) / 257 * (1 - amount) + Double($1) / 257 * amount).rounded())) }.joined()
+        let channels: [String] = zip(ScriptLiteral.rgb(a), ScriptLiteral.rgb(b)).map { pair in
+            let start = Double(pair.0) / 257.0
+            let end = Double(pair.1) / 257.0
+            let blended = start * (1.0 - amount) + end * amount
+            return String(format: "%02x", Int(blended.rounded()))
+        }
+        return "#" + channels.joined()
     }
     static func json(_ object: [String: Any]) throws -> String { String(decoding: try JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys]), as: UTF8.self) + "\n" }
     static func pi(_ t: Theme) throws -> String {
